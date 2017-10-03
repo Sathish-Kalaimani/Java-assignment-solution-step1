@@ -2,10 +2,17 @@ package com.stackroute.datamunger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class DataMunger {
 
-	public static void main(String[] args) {
+	public void main(String[] args) {
+		
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter String: ");
+		String queryString = scan.nextLine();
+		parseQuery(queryString);
+		scan.close();
 	}
 
 	/*

@@ -69,12 +69,8 @@ public class DataMunger {
 		if(queryString.isEmpty()) {
 			return null;
 		}else {
-			if(queryString.contains("where")) {
-				filename = queryString.substring(queryString.indexOf("from "), queryString.indexOf(" where")).replace("from", "").trim();
-			}else {
-				filename = queryString.substring(queryString.indexOf("from ")).replace("from", "").trim();
+			filename = queryString.split("from")[1].split("\\s+")[1].trim();
 			}
-		}
 		
 		return filename.toLowerCase();
 	}
@@ -97,13 +93,7 @@ public class DataMunger {
 		if(queryString.isEmpty()) {
 			return null;
 		}else {
-			if(queryString.contains("where")) {
-				base = queryString.substring(0, queryString.indexOf("where"));
-			}else if (queryString.contains("group")){
-				base = queryString.substring(0,queryString.indexOf("group"));
-			}else {
-				base = queryString.substring(0,queryString.indexOf("order"));
-			}
+			base = queryString.split("where|group|order")[0];
 		}
 			
 		return base;
@@ -124,12 +114,12 @@ public class DataMunger {
 	public String getConditionsPartQuery(String queryString) {
 		
 		String partquery = "";
-		if(queryString.contains("where") && queryString.contains("group")) {
-			partquery = queryString.substring(queryString.indexOf("where"), queryString.indexOf("group")).replace("where", "").toLowerCase();
-		}else if(queryString.contains("where") && queryString.contains("order")){
-			partquery = queryString.substring(queryString.indexOf("where"),queryString.indexOf("order")).replace("where", "").toLowerCase();
-		}else if(queryString.contains("where")){
-			partquery = queryString.substring(queryString.indexOf("where")).replace("where", "").toLowerCase();
+		if(queryString!=null) {
+			if(queryString.contains("where")) {
+			partquery = queryString.split("where")[1].split("group by|order by")[0].toLowerCase();
+			}else {
+				return null;
+			}
 		}else {
 			return null;
 		}
@@ -157,20 +147,20 @@ public class DataMunger {
 	 */
 	public String[] getConditions(String queryString) {
 
-		String con = getConditionsPartQuery(queryString);
+		
 		String[] conditions = null;
-		if(con==null) {
+		if(queryString==null) {
 			return null;
-		}else if(con.contains("and") && con.contains("or")) {
-			con = con.replace(" and ", ",").trim().replace(" or ", ",").trim().toLowerCase();
-			conditions = con.split(",");
-		}else if(con.contains("and")) {
-			con = con.replace(" and ", ",").trim().toLowerCase();
-			System.out.println("The 2 code is here"+ con);
-			conditions = con.split(",");
-		}else {
-			con = con.replace(" or ", ",").trim().toLowerCase();
-			conditions = con.split(",");
+		}else { 
+			String s = queryString.toLowerCase();
+			if(s.contains("where")) {
+			conditions = s.split("where")[1].split("group by|order by")[0].split("and|or ");
+			for(int i=0;i<conditions.length;i++) {
+				conditions[i]=conditions[i].trim();
+			}
+			}else {
+				return null;
+			}
 		}
 		
 		return conditions;
@@ -231,8 +221,7 @@ public class DataMunger {
 		if(queryString.isEmpty()) {
 			 return null;
 		}else {
-			String field = queryString.substring(queryString.indexOf("select "), queryString.indexOf("from ")).replace("select ", "").trim();
-			fields = field.split(",");
+			fields = queryString.split("select")[1].split("from")[0].trim().split(",");
 		}		
 		return fields;
 	}
@@ -253,9 +242,8 @@ public class DataMunger {
 		if(queryString.isEmpty() || queryString.contains("group by")) {
 			return null;
 		}else {
-			String field = queryString.substring(queryString.indexOf("order by")).replace("order by", "").trim();
-			orderby = field.split(" ");
-		}
+			orderby = queryString.split("order by")[1].trim().split(",");
+			}
 		
 		return orderby;
 	}
@@ -278,8 +266,7 @@ public class DataMunger {
 			groupby= null;
 			
 		}else {
-			String field = queryString.substring(queryString.indexOf("group by ")).replace("group by ", "");
-			groupby = field.split(" ");
+			groupby = queryString.split("group by")[1].trim().split(",");
 		}
 		
 		return groupby;
